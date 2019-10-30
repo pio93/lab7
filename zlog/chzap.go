@@ -5,6 +5,8 @@
 package zlog
 
 import (
+	"fmt"
+	"strings"
 	"time"
 )
 
@@ -38,12 +40,24 @@ type ChZap struct {
 // If the input string does not match the expected format, an error is returned.
 func NewSTBEvent(event string) (*ChZap, *StatusChange, error) {
 	//TODO(student) write this method
-	return nil, nil, nil
+	vals := strings.Split(event, ",")
+	const format = "2006/01/02, 15:04:05"
+	time, err := time.Parse(format, fmt.Sprintf("%s, %s", strings.TrimSpace(vals[0]), strings.TrimSpace(vals[1])))
+	if err != nil {
+		return nil, nil, err
+	}
+	chZap := ChZap{
+		Time:     time,
+		IP:       strings.TrimSpace(vals[2]),
+		FromChan: strings.TrimSpace(vals[3]),
+		ToChan:   strings.TrimSpace(vals[4]),
+	}
+	return &chZap, nil, nil
 }
 
 func (zap ChZap) String() string {
 	//TODO(student) write this method
-	return ""
+	return fmt.Sprintf("%v, %s, %s, %s", zap.Time, zap.IP, zap.FromChan, zap.ToChan)
 }
 
 func (schg StatusChange) String() string {
@@ -54,11 +68,12 @@ func (schg StatusChange) String() string {
 // Duration between receiving (this) zap event and the provided event.
 func (zap ChZap) Duration(provided ChZap) time.Duration {
 	//TODO(student) write this method
-	return time.Duration(0)
+	return zap.Time.Sub(provided.Time)
 }
 
 // Date returns the date of the zap event.
 func (zap ChZap) Date() string {
 	//TODO(student) write this method
-	return ""
+	vals := strings.Split(zap.Time.String(), ",")
+	return strings.TrimSpace(vals[0])
 }
