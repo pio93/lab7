@@ -33,6 +33,7 @@ type ChZap struct {
 	IP       string
 	FromChan string
 	ToChan   string
+	status StatusChange
 	//TODO(student) finish struct
 }
 

@@ -8,6 +8,7 @@ import (
 	"log"
 	"net"
 	"os"
+	"time"
 
 	"github.com/dat320/assignments/lab7/zlog"
 )
@@ -34,10 +35,13 @@ func runLab(labNum, mcastAdr string) {
 	case "1.1":
 		//TODO write code for dumping zap events to console
 		// go dumpAll()
+
 	case "1.3a":
 		//TODO write code for recording and showing # of viewers on NRK1
+		go showerViewers("NRK1")
 	case "1.3b":
 		//TODO write code for recording and showing # of viewers on NRK1 and TV2 Norge
+		go showerViewers("TV2 Norge")
 	case "1.4":
 		//TODO write code for measurements
 	case "1.5", "1.6", "1.7":
@@ -53,17 +57,9 @@ func start(mcastAdr string) {
 	log.Println("Starting ZapServer...")
 	//TODO(student) write this method (5p)
 	udpAddr, err := net.ResolveUDPAddr("udp", mcastAdr)
-
-	if err != nil {
-		log.Fatalf("Failed to resolve addr: %s", mcastAdr)
-	}
-
+	checkError(err, "Error resolving")
 	conn, err := net.ListenMulticastUDP("udp", nil, udpAddr)
-
-	if err != nil {
-		log.Fatalf("Failed to create listener for addr: %v", udpAddr)
-	}
-
+	checkError(err, "Error Multicast")
 	defer conn.Close()
 
 	for {
@@ -77,5 +73,18 @@ func start(mcastAdr string) {
 		}
 
 		fmt.Println(string(buff[0:n]))
+	}
+}
+
+func checkError(err error, msg string) {
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Message: %s | Fatal error:  %s", msg, err.Error())
+		os.Exit(1)
+	}
+}
+func showerViewers(chName string) {
+	for {
+		time.Sleep(1 * time.Second)
+		fmt.Printf("Viewers on %s : %d", chName, ztore.Viewers(chName))
 	}
 }

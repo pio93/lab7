@@ -35,10 +35,18 @@ func (zs *Zaps) String() string {
 // Viewers returns the current number of viewers for a channel.
 func (zs *Zaps) Viewers(chName string) int {
 	defer TimeElapsed(time.Now(), "simple.Viewers")
-	//TODO(student) write this method
-	return 0
-}
+	viewers := 0
+	for _, v := range *zs {
+		if v.ToChan == chName {
+			viewers++
+		}
+		if v.FromChan == chName {
+			viewers--
+		}
+	}
 
+	return viewers
+}
 // Channels returns a slice of the channels found in the zaps (both to and from).
 func (zs *Zaps) Channels() []string {
 	defer TimeElapsed(time.Now(), "simple.Channels")
