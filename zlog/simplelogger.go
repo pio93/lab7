@@ -47,6 +47,7 @@ func (zs *Zaps) Viewers(chName string) int {
 
 	return viewers
 }
+
 // Channels returns a slice of the channels found in the zaps (both to and from).
 func (zs *Zaps) Channels() []string {
 	defer TimeElapsed(time.Now(), "simple.Channels")

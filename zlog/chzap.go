@@ -5,6 +5,7 @@
 package zlog
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 	"time"
@@ -33,18 +34,32 @@ type ChZap struct {
 	IP       string
 	FromChan string
 	ToChan   string
-	status StatusChange
+	status   StatusChange
 	//TODO(student) finish struct
 }
+
+/*type event struct {
+	chzap ChZap
+	stChange StatusChange
+}*/
 
 // NewSTBEvent returns zap event or a status change event.
 // If the input string does not match the expected format, an error is returned.
 func NewSTBEvent(event string) (*ChZap, *StatusChange, error) {
 	//TODO(student) write this method
 	vals := strings.Split(event, ",")
-	const format = "2006/01/02, 15:04:05"
-	time, err := time.Parse(format, fmt.Sprintf("%s, %s", strings.TrimSpace(vals[0]), strings.TrimSpace(vals[1])))
+
+	if len(vals) < 3 {
+		err := fmt.Errorf("NewSTBEvent: too short event string: %s", event)
+		return nil, nil, err
+	} else if len(vals) < 5 {
+		err := fmt.Errorf("NewSTBEvent: event with too few fields: %s", event)
+		return nil, nil, err
+	}
+
+	time, err := time.Parse(timeFormat, fmt.Sprintf("%s, %s", strings.TrimSpace(vals[0]), strings.TrimSpace(vals[1])))
 	if err != nil {
+		err := errors.New("NewSTBEvent: failed to parse timestamp")
 		return nil, nil, err
 	}
 	chZap := ChZap{

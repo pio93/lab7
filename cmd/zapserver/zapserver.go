@@ -13,13 +13,14 @@ import (
 	"github.com/dat320/assignments/lab7/zlog"
 )
 
+var chans chan *zlog.ChZap
 var ztore zlog.ZapLogger
 
 // runLab starts the server, sets up the zap storage, and runs the specified lab.
 // Note that this function must not block.
 func runLab(labNum, mcastAdr string) {
+	chans = make(chan *zlog.ChZap)
 	start(mcastAdr)
-
 	switch labNum {
 	case "1.2":
 		log.Println("For exercise 1.2, run: go test -v")
@@ -34,8 +35,7 @@ func runLab(labNum, mcastAdr string) {
 	switch labNum {
 	case "1.1":
 		//TODO write code for dumping zap events to console
-		// go dumpAll()
-
+		go dumpAll()
 	case "1.3a":
 		//TODO write code for recording and showing # of viewers on NRK1
 		go showerViewers("NRK1")
@@ -51,15 +51,25 @@ func runLab(labNum, mcastAdr string) {
 	}
 }
 
+func dumpAll() {
+	for v := range chans {
+		fmt.Println(v.String())
+	}
+}
+
 // start starts the zapserver event processing loop.
 // Note that this function must not block.
 func start(mcastAdr string) {
 	log.Println("Starting ZapServer...")
 	//TODO(student) write this method (5p)
 	udpAddr, err := net.ResolveUDPAddr("udp", mcastAdr)
+
 	checkError(err, "Error resolving")
+
 	conn, err := net.ListenMulticastUDP("udp", nil, udpAddr)
+
 	checkError(err, "Error Multicast")
+
 	defer conn.Close()
 
 	for {
@@ -72,8 +82,14 @@ func start(mcastAdr string) {
 			return
 		}
 
-		fmt.Println(string(buff[0:n]))
+		ch, _, _ := zlog.NewSTBEvent(string(buff[0:n]))
+		if ch != nil {
+			chans <- ch
+		}
+
+		//fmt.Println(string(buff[0:n]))
 	}
+
 }
 
 func checkError(err error, msg string) {
