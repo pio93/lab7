@@ -48,7 +48,6 @@ type ChZap struct {
 func NewSTBEvent(event string) (*ChZap, *StatusChange, error) {
 	//TODO(student) write this method
 	vals := strings.Split(event, ",")
-
 	if len(vals) < 3 {
 		err := fmt.Errorf("NewSTBEvent: too short event string: %s", event)
 		return nil, nil, err

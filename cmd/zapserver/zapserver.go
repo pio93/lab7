@@ -21,6 +21,7 @@ var ztore zlog.ZapLogger
 func runLab(labNum, mcastAdr string) {
 	chans = make(chan *zlog.ChZap)
 	start(mcastAdr)
+
 	switch labNum {
 	case "1.2":
 		log.Println("For exercise 1.2, run: go test -v")
@@ -64,42 +65,41 @@ func start(mcastAdr string) {
 	//TODO(student) write this method (5p)
 	udpAddr, err := net.ResolveUDPAddr("udp", mcastAdr)
 
-	log.Println("Resolved addres")
+	log.Printf("Resolved addres: %s", mcastAdr)
 
 	checkError(err, "Error resolving")
 
 	conn, err := net.ListenMulticastUDP("udp", nil, udpAddr)
 
-	log.Printf("Listening to address: %s", mcastAdr)
+	log.Printf("Listening to address: %s", udpAddr)
 
 	checkError(err, "Error Multicast")
 
+	go handleEvent(conn)
+
+}
+
+func handleEvent(conn *net.UDPConn) {
 	defer conn.Close()
-	go func() {
-		for {
-			fmt.Println("Entered for loop")
-			buff := make([]byte, 1024)
 
-			n, err := conn.Read(buff[0:])
+	fmt.Println("Created buffer")
 
-			fmt.Println("Reading...")
+	for {
+		var buff [1024]byte
+		n, _, err := conn.ReadFromUDP(buff[0:])
 
-			if err != nil {
-				log.Fatalf("Read error: %v", err)
-				return
-			}
-
-			ch, _, _ := zlog.NewSTBEvent(string(buff[0:n]))
-			fmt.Printf("Got event: %s", ch.String())
-			if ch != nil {
-				fmt.Println("Putting to channel")
-				chans <- ch
-			}
-
-			fmt.Println(string(buff[0:n]))
+		if err != nil {
+			log.Fatalf("Read error: %v", err)
+			return
 		}
-	}()
 
+		ch, _, _ := zlog.NewSTBEvent(string(buff[0:n]))
+
+		if ch != nil {
+			chans <- ch
+		}
+
+	}
 }
 
 func checkError(err error, msg string) {
