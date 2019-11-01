@@ -19,6 +19,7 @@ func main() {
 	flag.Parse()
 	signalChan := make(chan os.Signal, 1)
 	signal.Notify(signalChan, os.Kill, os.Interrupt)
+	fmt.Println("start")
 	runLab(*lab, *maddr)
 
 	// wait for CTRL-C or some other kill signal

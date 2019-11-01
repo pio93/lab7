@@ -64,31 +64,41 @@ func start(mcastAdr string) {
 	//TODO(student) write this method (5p)
 	udpAddr, err := net.ResolveUDPAddr("udp", mcastAdr)
 
+	log.Println("Resolved addres")
+
 	checkError(err, "Error resolving")
 
 	conn, err := net.ListenMulticastUDP("udp", nil, udpAddr)
 
+	log.Printf("Listening to address: %s", mcastAdr)
+
 	checkError(err, "Error Multicast")
 
 	defer conn.Close()
+	go func() {
+		for {
+			fmt.Println("Entered for loop")
+			buff := make([]byte, 1024)
 
-	for {
-		buff := make([]byte, 1024)
+			n, err := conn.Read(buff[0:])
 
-		n, err := conn.Read(buff[0:])
+			fmt.Println("Reading...")
 
-		if err != nil {
-			log.Fatalf("Read error: %v", err)
-			return
+			if err != nil {
+				log.Fatalf("Read error: %v", err)
+				return
+			}
+
+			ch, _, _ := zlog.NewSTBEvent(string(buff[0:n]))
+			fmt.Printf("Got event: %s", ch.String())
+			if ch != nil {
+				fmt.Println("Putting to channel")
+				chans <- ch
+			}
+
+			fmt.Println(string(buff[0:n]))
 		}
-
-		ch, _, _ := zlog.NewSTBEvent(string(buff[0:n]))
-		if ch != nil {
-			chans <- ch
-		}
-
-		//fmt.Println(string(buff[0:n]))
-	}
+	}()
 
 }
 
