@@ -12,6 +12,8 @@ import (
 // Zaps is a slice of ChZap events.
 type Zaps []ChZap
 
+var viewers int
+
 // NewSimpleZapLogger returns a simple zap logger that operates over a slice data structure.
 func NewSimpleZapLogger() *Zaps {
 	z := make(Zaps, 0)
@@ -35,13 +37,15 @@ func (zs *Zaps) String() string {
 // Viewers returns the current number of viewers for a channel.
 func (zs *Zaps) Viewers(chName string) int {
 	defer TimeElapsed(time.Now(), "simple.Viewers")
-	viewers := 0
 	for _, v := range *zs {
 		if v.ToChan == chName {
 			viewers++
 		}
 		if v.FromChan == chName {
 			viewers--
+			if viewers <= 0 {
+				viewers = 0
+			}
 		}
 	}
 

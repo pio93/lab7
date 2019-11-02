@@ -19,9 +19,7 @@ var ztore zlog.ZapLogger
 // runLab starts the server, sets up the zap storage, and runs the specified lab.
 // Note that this function must not block.
 func runLab(labNum, mcastAdr string) {
-	chans = make(chan *zlog.ChZap)
 	start(mcastAdr)
-
 	switch labNum {
 	case "1.2":
 		log.Println("For exercise 1.2, run: go test -v")
@@ -36,6 +34,7 @@ func runLab(labNum, mcastAdr string) {
 	switch labNum {
 	case "1.1":
 		//TODO write code for dumping zap events to console
+		chans = make(chan *zlog.ChZap)
 		go dumpAll()
 	case "1.3a":
 		//TODO write code for recording and showing # of viewers on NRK1
@@ -82,8 +81,6 @@ func start(mcastAdr string) {
 func handleEvent(conn *net.UDPConn) {
 	defer conn.Close()
 
-	fmt.Println("Created buffer")
-
 	for {
 		var buff [1024]byte
 		n, _, err := conn.ReadFromUDP(buff[0:])
@@ -96,7 +93,12 @@ func handleEvent(conn *net.UDPConn) {
 		ch, _, _ := zlog.NewSTBEvent(string(buff[0:n]))
 
 		if ch != nil {
-			chans <- ch
+			if ztore != nil {
+				ztore.Add(*ch)
+			} else {
+				chans <- ch
+			}
+
 		}
 
 	}
@@ -111,6 +113,6 @@ func checkError(err error, msg string) {
 func showerViewers(chName string) {
 	for {
 		time.Sleep(1 * time.Second)
-		fmt.Printf("Viewers on %s : %d", chName, ztore.Viewers(chName))
+		fmt.Printf("Viewers on %s : %d\n", chName, ztore.Viewers(chName))
 	}
 }
