@@ -8,6 +8,8 @@ import (
 	"log"
 	"net"
 	"os"
+	"runtime"
+	"sort"
 	"time"
 
 	"github.com/dat320/assignments/lab7/zlog"
@@ -38,14 +40,16 @@ func runLab(labNum, mcastAdr string) {
 		go dumpAll()
 	case "1.3a":
 		//TODO write code for recording and showing # of viewers on NRK1
-		go showerViewers("NRK1")
+		go showViewers("NRK1")
 	case "1.3b":
 		//TODO write code for recording and showing # of viewers on NRK1 and TV2 Norge
-		go showerViewers("TV2 Norge")
+		go showViewers("TV2 Norge")
 	case "1.4":
 		//TODO write code for measurements
+		go showViewersWithStats("NRK1")
 	case "1.5", "1.6", "1.7":
 		//TODO write code for top-10 list (generic for different data structures)
+		go topTen()
 	case "2.x":
 		//TODO write code for publishing events to a subscriber client
 	}
@@ -110,9 +114,41 @@ func checkError(err error, msg string) {
 		os.Exit(1)
 	}
 }
-func showerViewers(chName string) {
+func showViewers(chName string) {
 	for {
 		time.Sleep(1 * time.Second)
 		fmt.Printf("Viewers on %s : %d\n", chName, ztore.Viewers(chName))
+	}
+
+}
+
+func showViewersWithStats(chName string) {
+	for {
+		time.Sleep(1 * time.Second)
+		fmt.Printf("Viewers on %s : %d\n", chName, ztore.Viewers(chName))
+
+		var m runtime.MemStats
+		runtime.ReadMemStats(&m)
+
+		fmt.Printf("Allocated memory: %v bytes\tTotal allocated memory: %v bytes\n", m.Alloc, m.TotalAlloc)
+	}
+}
+
+func topTen() {
+	for {
+		time.Sleep(1 * time.Second)
+		channels := ztore.ChannelsViewers()
+
+		sort.SliceStable(channels, func(i, j int) bool {
+			return channels[i].Viewers > channels[j].Viewers
+		})
+
+		fmt.Println("Top 10")
+		for i, v := range channels {
+			fmt.Printf("%d: %s\n", i+1, v.String())
+			if i == 9 {
+				break
+			}
+		}
 	}
 }

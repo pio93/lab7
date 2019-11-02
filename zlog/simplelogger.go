@@ -56,7 +56,18 @@ func (zs *Zaps) Viewers(chName string) int {
 func (zs *Zaps) Channels() []string {
 	defer TimeElapsed(time.Now(), "simple.Channels")
 	//TODO(student) write this method
-	return nil
+	channelNames := make(map[string]bool)
+	for _, v := range *zs {
+		channelNames[v.ToChan] = true
+		channelNames[v.FromChan] = true
+	}
+
+	result := make([]string, 0)
+
+	for key := range channelNames {
+		result = append(result, key)
+	}
+	return result
 }
 
 // ChannelsViewers returns a slice of ChannelViewers, which is defined in zaplogger.go.
@@ -64,5 +75,17 @@ func (zs *Zaps) Channels() []string {
 func (zs *Zaps) ChannelsViewers() []*ChannelViewers {
 	defer TimeElapsed(time.Now(), "simple.ChannelsViewers")
 	//TODO(student) write this method
-	return nil
+	channels := zs.Channels()
+	result := make([]*ChannelViewers, 0)
+
+	for _, v := range channels {
+		viewers := zs.Viewers(v)
+		channelViewer := ChannelViewers{
+			Channel: v,
+			Viewers: viewers,
+		}
+		result = append(result, &channelViewer)
+	}
+
+	return result
 }
