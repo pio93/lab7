@@ -58,16 +58,23 @@ func (zs *ViewersLog) Viewers(chName string) int {
 }
 
 //Channels return list of all channels without duplicates.
+//using channelnames as keys with empty struct as value to save memory
+// then converting to a string slice
 func (zs *ViewersLog) Channels() []string {
 	defer TimeElapsed(time.Now(), "simple.Channels")
-
-	result := make([]string, 0)
-
-	for key := range zs.channelNames {
-		result = append(result, key)
-	}
-
-	return result
+		if len(*zs) < 1{
+			return nil
+		}
+		chValue := make(map[string] struct{})
+		for _,v :=range *zs{
+			chValue[v.ToChan]= struct{}{}
+			chValue[v.FromChan]= struct{}{}
+		}
+		strArr:= make([]string, 0 ,len(chValue))
+		for key:=range chValue{
+			strArr= append(strArr,key)
+		}
+	return strArr
 }
 
 //ChannelsViewers works similarly to ChannelViewers in simplelogger.go.
@@ -75,14 +82,14 @@ func (zs *ViewersLog) ChannelsViewers() []*ChannelViewers {
 	defer TimeElapsed(time.Now(), "simple.ChannelsViewers")
 	channels := zs.Channels()
 	result := make([]*ChannelViewers, 0)
-
-	for _, v := range channels {
+	if channels == nil || len(channels) ==0{
+		return nil
+	}
+	result:= make([]*ChannelViewers,len(channels))
+	for _, str := range channels {
 		viewers := zs.Viewers(v)
-		channelViewer := ChannelViewers{
-			Channel: v,
-			Viewers: viewers,
-		}
-		result = append(result, &channelViewer)
+		channelViewer := ChannelViewers{Channel: v,Viewers: viewers,}
+		result = append(result,channelViewer := ChannelViewers{Channel: str,Viewers: viewers,})
 	}
 
 	return result
