@@ -29,11 +29,13 @@ func (zs *ViewersLog) Add(z ChZap) {
 	_, okFrom := zs.chansViewers[z.FromChan]
 
 	if okTo == false {
-		zs.chansViewers[z.ToChan] = &ChannelViewers{Channel: z.ToChan, Viewers: 0}
+		zs.chansViewers[z.ToChan] = &ChannelViewers{Channel: z.ToChan, Viewers: 1}
+
 	}
 
 	if okFrom == false {
-		zs.chansViewers[z.ToChan] = &ChannelViewers{Channel: z.ToChan, Viewers: 0}
+		zs.chansViewers[z.FromChan] = &ChannelViewers{Channel: z.FromChan, Viewers: 0}
+
 	}
 
 	if okTo == true {
@@ -42,6 +44,11 @@ func (zs *ViewersLog) Add(z ChZap) {
 
 	if okFrom == true {
 		zs.chansViewers[z.FromChan].Viewers--
+
+		if zs.chansViewers[z.FromChan].Viewers <= 0 {
+			zs.chansViewers[z.FromChan].Viewers = 0
+		}
+
 	}
 }
 

@@ -37,7 +37,6 @@ func (zs *Zaps) String() string {
 // Viewers returns the current number of viewers for a channel.
 func (zs *Zaps) Viewers(chName string) int {
 	defer TimeElapsed(time.Now(), "simple.Viewers")
-	fmt.Println(zs.String())
 	for _, v := range *zs {
 		if v.ToChan == chName {
 			viewers++
