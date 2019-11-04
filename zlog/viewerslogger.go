@@ -12,7 +12,7 @@ type ViewersLog struct {
 	Zaps         chan ChZap
 	viewers      int
 	channelNames map[string]bool
-	Chans        map[string]ChannelViewers
+	Chans        map[string]*ChannelViewers
 }
 
 // NewViewersZapLogger returns a viewers logger.
