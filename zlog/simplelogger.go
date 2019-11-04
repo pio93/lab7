@@ -6,7 +6,6 @@ package zlog
 
 import (
 	"fmt"
-	"sort"
 	"time"
 )
 
@@ -38,6 +37,7 @@ func (zs *Zaps) String() string {
 // Viewers returns the current number of viewers for a channel.
 func (zs *Zaps) Viewers(chName string) int {
 	defer TimeElapsed(time.Now(), "simple.Viewers")
+	fmt.Println(zs.String())
 	for _, v := range *zs {
 		if v.ToChan == chName {
 			viewers++
@@ -89,16 +89,4 @@ func (zs *Zaps) ChannelsViewers() []*ChannelViewers {
 	}
 
 	return result
-}
-
-func (zs *Zaps) Top10() []*ChannelViewers {
-	ch := zs.ChannelsViewers()
-	sort.SliceStable(ch, func(i, j int) bool {
-		return ch[i].Viewers > ch[j].Viewers
-	})
-	if len(ch) >= 10 {
-		s := (ch)[:10]
-		return s
-	}
-	return nil
 }

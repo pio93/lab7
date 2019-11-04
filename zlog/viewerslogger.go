@@ -2,104 +2,84 @@ package zlog
 
 import (
 	"fmt"
-	"sort"
 	"time"
 )
 
-// ViewersLog data structure is a more efficient storage of zap events.
+//ViewersLog data structure is a more efficient storage of zap events.
 type ViewersLog struct {
 	//TODO(student) finish struct
-	Zaps         chan ChZap
-	viewers      int
-	channelNames map[string]bool
-	Chans        map[string]*ChannelViewers
+	chansViewers map[string]*ChannelViewers
 }
 
 // NewViewersZapLogger returns a viewers logger.
 func NewViewersZapLogger() *ViewersLog {
 	//TODO(student) finish constructor
-	channel := make(chan ChZap)
-	return &ViewersLog{Zaps: channel, viewers: 0}
+	chViewers := make(map[string]*ChannelViewers)
+	return &ViewersLog{chansViewers: chViewers}
 }
 
 //TODO(student) implement ZapLogger interface for your more efficient data structure.
 
-//Add puts zap on Zaps channel and strings with names to channelNames.
+//Add checks if channel already exists. If not it adds it to map. It also increments or decrements number of viewers
+//based on FromChan and ToChan
 func (zs *ViewersLog) Add(z ChZap) {
-	zs.Zaps <- z
-	zs.channelNames[z.ToChan] = true
-	zs.channelNames[z.FromChan] = true
+
+	_, okTo := zs.chansViewers[z.ToChan]
+
+	_, okFrom := zs.chansViewers[z.FromChan]
+
+	if okTo == false {
+		zs.chansViewers[z.ToChan] = &ChannelViewers{Channel: z.ToChan, Viewers: 0}
+	}
+
+	if okFrom == false {
+		zs.chansViewers[z.ToChan] = &ChannelViewers{Channel: z.ToChan, Viewers: 0}
+	}
+
+	if okTo == true {
+		zs.chansViewers[z.ToChan].Viewers++
+	}
+
+	if okFrom == true {
+		zs.chansViewers[z.FromChan].Viewers--
+	}
 }
 
-//Entries return length of channel.
+//Entries returns length of a map
 func (zs *ViewersLog) Entries() int {
-	return len(zs.Zaps)
+	return len(zs.chansViewers)
 }
 
 func (zs *ViewersLog) String() string {
-	return fmt.Sprintf("SS: %d", len(zs.Zaps))
+	return fmt.Sprintf("SS: %d", len(zs.chansViewers))
 }
 
-//Viewers reads from zapChannel and and updates viewers counter.
+//Viewers returns number of viewers on specific channel
 func (zs *ViewersLog) Viewers(chName string) int {
 	defer TimeElapsed(time.Now(), "simple.Viewers")
-
-	v := <-zs.Zaps
-
-	if v.ToChan == chName {
-		zs.viewers++
-	}
-	if v.FromChan == chName {
-		zs.viewers--
-		if zs.viewers <= 0 {
-			zs.viewers = 0
-		}
-	}
-	return zs.viewers
-
+	return zs.chansViewers[chName].Viewers
 }
 
-//Channels return list of all channels without duplicates.
-//using channelnames as keys with empty struct as value to save memory
-// then converting to a string slice
+//Channels return a list with channels
 func (zs *ViewersLog) Channels() []string {
 	defer TimeElapsed(time.Now(), "simple.Channels")
-	str := make([]string, 0)
-	zap := (*zs).Chans
-	if len(zap) < 1 {
-		return nil
+	//TODO(student) write this method
+	result := make([]string, 0)
+	for key := range zs.chansViewers {
+		result = append(result, key)
 	}
-	for _, v := range zap {
-		str = append(str, v.Channel)
-	}
-	return str
+	return result
 }
 
-//ChannelsViewers works similarly to ChannelViewers in simplelogger.go.
+//ChannelsViewers returns a list with pointers of ChannelViewers objects.
 func (zs *ViewersLog) ChannelsViewers() []*ChannelViewers {
 	defer TimeElapsed(time.Now(), "simple.ChannelsViewers")
-	channels := zs.Channels()
+	//TODO(student) write this method
+
 	result := make([]*ChannelViewers, 0)
-	if channels == nil || len(channels) == 0 {
-		return nil
-	}
-	result = make([]*ChannelViewers, len(channels))
-	for _, str := range channels {
-		viewers := zs.Viewers(str)
-		channelViewer := ChannelViewers{Channel: str, Viewers: viewers}
-		result = append(result, &channelViewer)
+	for _, value := range zs.chansViewers {
+		result = append(result, value)
 	}
 
 	return result
-}
-func (zs *ViewersLog) Top10() []*ChannelViewers {
-	ch := zs.ChannelsViewers()
-	sort.SliceStable(ch, func(i, j int) bool {
-		return ch[i].Viewers > ch[j].Viewers
-	})
-	if len(ch) >= 10 {
-		s := (ch)[:10]
-		return s
-	}
-	return nil
 }
