@@ -2,6 +2,7 @@ package zlog
 
 import (
 	"fmt"
+	"sort"
 	"time"
 )
 
@@ -11,6 +12,7 @@ type ViewersLog struct {
 	Zaps         chan ChZap
 	viewers      int
 	channelNames map[string]bool
+	Chans        map[string]ChannelViewers
 }
 
 // NewViewersZapLogger returns a viewers logger.
@@ -62,19 +64,15 @@ func (zs *ViewersLog) Viewers(chName string) int {
 // then converting to a string slice
 func (zs *ViewersLog) Channels() []string {
 	defer TimeElapsed(time.Now(), "simple.Channels")
-		if len(*zs) < 1{
-			return nil
-		}
-		chValue := make(map[string] struct{})
-		for _,v :=range *zs{
-			chValue[v.ToChan]= struct{}{}
-			chValue[v.FromChan]= struct{}{}
-		}
-		strArr:= make([]string, 0 ,len(chValue))
-		for key:=range chValue{
-			strArr= append(strArr,key)
-		}
-	return strArr
+	str := make([]string, 0)
+	zap := (*zs).Chans
+	if len(zap) < 1 {
+		return nil
+	}
+	for _, v := range zap {
+		str = append(str, v.Channel)
+	}
+	return str
 }
 
 //ChannelsViewers works similarly to ChannelViewers in simplelogger.go.
@@ -82,15 +80,26 @@ func (zs *ViewersLog) ChannelsViewers() []*ChannelViewers {
 	defer TimeElapsed(time.Now(), "simple.ChannelsViewers")
 	channels := zs.Channels()
 	result := make([]*ChannelViewers, 0)
-	if channels == nil || len(channels) ==0{
+	if channels == nil || len(channels) == 0 {
 		return nil
 	}
-	result:= make([]*ChannelViewers,len(channels))
+	result = make([]*ChannelViewers, len(channels))
 	for _, str := range channels {
-		viewers := zs.Viewers(v)
-		channelViewer := ChannelViewers{Channel: v,Viewers: viewers,}
-		result = append(result,channelViewer := ChannelViewers{Channel: str,Viewers: viewers,})
+		viewers := zs.Viewers(str)
+		channelViewer := ChannelViewers{Channel: str, Viewers: viewers}
+		result = append(result, &channelViewer)
 	}
 
 	return result
+}
+func (zs *ViewersLog) Top10() []*ChannelViewers {
+	ch := zs.ChannelsViewers()
+	sort.SliceStable(ch, func(i, j int) bool {
+		return ch[i].Viewers > ch[j].Viewers
+	})
+	if len(ch) >= 10 {
+		s := (ch)[:10]
+		return s
+	}
+	return nil
 }

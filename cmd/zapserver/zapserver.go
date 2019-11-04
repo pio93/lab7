@@ -9,7 +9,6 @@ import (
 	"net"
 	"os"
 	"runtime"
-	"sort"
 	"time"
 
 	"github.com/dat320/assignments/lab7/zlog"
@@ -29,7 +28,7 @@ func runLab(labNum, mcastAdr string) {
 	case "1.3a", "1.3b", "1.4", "1.5":
 		ztore = zlog.NewSimpleZapLogger()
 	case "1.6", "2.x":
-		ztore = zlog.NewViewersZapLogger()
+		// ztore = zlog.NewViewersZapLogger()
 	case "1.7":
 		// ztore = zlog.NewConcurrentZapLogger()
 	}
@@ -137,18 +136,6 @@ func showViewersWithStats(chName string) {
 func topTen() {
 	for {
 		time.Sleep(1 * time.Second)
-		channels := ztore.ChannelsViewers()
-
-		sort.SliceStable(channels, func(i, j int) bool {
-			return channels[i].Viewers > channels[j].Viewers
-		})
-
-		fmt.Println("Top 10")
-		for i, v := range channels {
-			fmt.Printf("%d: %s\n", i+1, v.String())
-			if i == 9 {
-				break
-			}
-		}
+		fmt.Printf("Top 10: %s", ztore.Top10())
 	}
 }
