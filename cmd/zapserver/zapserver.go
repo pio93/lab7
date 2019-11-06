@@ -52,6 +52,7 @@ func runLab(labNum, mcastAdr string) {
 		go topTen()
 	case "2.x":
 		//TODO write code for publishing events to a subscriber client
+		startGRPC()
 	}
 }
 
