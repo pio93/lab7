@@ -10,9 +10,12 @@ message SubscribeRequest {
 	// TODO: Add the variable(s) in the subscribe message
 	string ClientAddr = 1;
 	int64 RefreshRate = 2;
+	string Function = 3;
 }
 
 message Notification {
 	// TODO: Add the variable(s) in the notification message
 	repeated string Channel = 1;
+	repeated int64 Viewers = 2;
+	repeated string Duration = 3;
 }

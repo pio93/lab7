@@ -17,6 +17,7 @@ import (
 
 var chans chan *zlog.ChZap
 var ztore zlog.ZapLogger
+var durtore zlog.DurLogger
 
 // runLab starts the server, sets up the zap storage, and runs the specified lab.
 // Note that this function must not block.
@@ -52,6 +53,7 @@ func runLab(labNum, mcastAdr string) {
 		go topTen()
 	case "2.x":
 		//TODO write code for publishing events to a subscriber client
+		durtore = zlog.NewDurationLogger()
 		startGRPC()
 	}
 }
@@ -100,6 +102,9 @@ func handleEvent(conn *net.UDPConn) {
 		if ch != nil {
 			if ztore != nil {
 				ztore.Add(*ch)
+				if durtore != nil {
+					durtore.Add(*ch)
+				}
 			} else {
 				chans <- ch
 			}
@@ -154,6 +159,6 @@ func topTen() {
 		var m runtime.MemStats
 		runtime.ReadMemStats(&m)
 
-		fmt.Printf("Allocated memory: %v bytes\tTotal allocated memory: %v bytes\n", m.Alloc, m.TotalAlloc)
+		fmt.Printf("Allocated memory: %v bytes\tTotal allocated memory: %v bytes\tObtained from OS: %v bytes\n", m.Alloc, m.TotalAlloc, m.HeapSys)
 	}
 }

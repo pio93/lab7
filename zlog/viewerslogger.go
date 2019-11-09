@@ -50,6 +50,7 @@ func (zs *ViewersLog) Add(z ChZap) {
 		}
 
 	}
+
 }
 
 //Entries returns length of a map

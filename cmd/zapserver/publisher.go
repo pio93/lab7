@@ -19,42 +19,70 @@ type Server struct {
 //Subscribe is...
 func (srv Server) Subscribe(subReq *proto.SubscribeRequest, stream proto.Subscription_SubscribeServer) error {
 	seconds, _ := time.ParseDuration(fmt.Sprintf("%ds", subReq.RefreshRate))
-	go func() {
-		for {
-			log.Printf("Sending to addrres : %s\n", subReq.ClientAddr)
-			log.Printf("Waits for %d seconds\n", subReq.RefreshRate)
-			time.Sleep(seconds)
+	function := subReq.Function
+	if function == "top10" {
+		go func() {
+			for {
+				log.Printf("Sending to %s\n", subReq.ClientAddr)
+				log.Printf("Waits for %d seconds\n", subReq.RefreshRate)
+				time.Sleep(seconds)
 
-			channels := ztore.ChannelsViewers()
+				channels := ztore.ChannelsViewers()
 
-			sort.SliceStable(channels, func(i, j int) bool {
-				return channels[i].Viewers > channels[j].Viewers
-			})
+				sort.SliceStable(channels, func(i, j int) bool {
+					return channels[i].Viewers > channels[j].Viewers
+				})
 
-			topTen := make([]string, 0)
+				topTen := make([]string, 0)
+				ttViewers := make([]int64, 0)
 
-			for i, v := range channels {
-				topTen = append(topTen, v.Channel)
-				if i == 9 {
-					break
+				for i, v := range channels {
+					topTen = append(topTen, v.Channel)
+					ttViewers = append(ttViewers, int64(v.Viewers))
+					if i == 9 {
+						break
+					}
+				}
+
+				notification := proto.Notification{Channel: topTen, Viewers: ttViewers}
+
+				err := stream.Send(&notification)
+
+				if err != nil {
+					srv.errChan <- err
 				}
 			}
+		}()
+	} else if function == "durations" {
+		go func() {
+			for {
+				log.Printf("Sending to %s\n", subReq.ClientAddr)
+				log.Printf("Waits for %d seconds\n", subReq.RefreshRate)
+				time.Sleep(seconds)
 
-			notification := proto.Notification{Channel: topTen}
+				stats := durtore.GetStats()
+				result := make([]string, len(stats))
 
-			err := stream.Send(&notification)
+				copy(result, stats)
 
-			if err != nil {
-				srv.errChan <- err
+				durtore.ClearStats()
+
+				notification := proto.Notification{Duration: result}
+				err := stream.Send(&notification)
+
+				if err != nil {
+					srv.errChan <- err
+				}
+
 			}
-		}
-	}()
+		}()
+	}
 	log.Println("Ended stream")
 	return <-srv.errChan
 }
 
 func startGRPC() {
-	listener, err := net.Listen("tcp", ":4040")
+	listener, err := net.Listen("tcp", ":4050")
 	log.Println("Listeing to clients on port")
 	if err != nil {
 		log.Fatalf("Failed to listen: %v\n", err)
