@@ -18,7 +18,7 @@ func main() {
 	)
 
 	flag.Parse()
-	conn, err := grpc.Dial("127.0.0.1:4050", grpc.WithInsecure())
+	conn, err := grpc.Dial("127.0.0.1:4052", grpc.WithInsecure())
 	log.Println("Dialing...")
 
 	if err != nil {
@@ -50,20 +50,21 @@ func main() {
 		}
 	} else if *serv == "durations" {
 		for {
-			fmt.Println("Durations")
 			notification, err := stream.Recv()
 
 			if err != nil {
 				log.Fatalf("Failed to retriver notification from server: %v", err)
 				break
 			}
+
+			fmt.Println("\nDurations")
+
 			if len(notification.Duration) == 0 {
 				fmt.Println("No changes yet.")
 			} else {
 				for _, v := range notification.Duration {
 					fmt.Println(v)
 				}
-
 			}
 		}
 	} else {

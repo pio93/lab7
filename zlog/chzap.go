@@ -83,6 +83,7 @@ func (schg StatusChange) String() string {
 // Duration between receiving (this) zap event and the provided event.
 func (zap ChZap) Duration(provided ChZap) time.Duration {
 	//TODO(student) write this method
+	fmt.Println(provided.Time.Sub(zap.Time))
 	return provided.Time.Sub(zap.Time)
 }
 

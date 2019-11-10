@@ -2,7 +2,7 @@ package zlog
 
 import "time"
 
-// DurLogger is...
+// DurLogger is an interface for storing durations of zap events
 type DurLogger interface {
 	Add(ChZap)
 	GetStats() []string

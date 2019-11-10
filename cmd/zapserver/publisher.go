@@ -82,8 +82,8 @@ func (srv Server) Subscribe(subReq *proto.SubscribeRequest, stream proto.Subscri
 }
 
 func startGRPC() {
-	listener, err := net.Listen("tcp", ":4050")
-	log.Println("Listeing to clients on port")
+	listener, err := net.Listen("tcp", ":4052")
+	log.Println("Listeing to clients on port 4052")
 	if err != nil {
 		log.Fatalf("Failed to listen: %v\n", err)
 	}
