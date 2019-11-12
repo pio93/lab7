@@ -15,7 +15,7 @@ import (
 	"github.com/dat320/assignments/lab7/zlog"
 )
 
-var chans chan *zlog.ChZap
+var events chan string
 var ztore zlog.ZapLogger
 var durtore zlog.DurLogger
 
@@ -37,7 +37,7 @@ func runLab(labNum, mcastAdr string) {
 	switch labNum {
 	case "1.1":
 		//TODO write code for dumping zap events to console
-		chans = make(chan *zlog.ChZap)
+		events = make(chan string)
 		go dumpAll()
 	case "1.3a":
 		//TODO write code for recording and showing # of viewers on NRK1
@@ -59,8 +59,8 @@ func runLab(labNum, mcastAdr string) {
 }
 
 func dumpAll() {
-	for v := range chans {
-		fmt.Println(v.String())
+	for v := range events {
+		fmt.Println(v)
 	}
 }
 
@@ -97,18 +97,21 @@ func handleEvent(conn *net.UDPConn) {
 			return
 		}
 
-		ch, _, _ := zlog.NewSTBEvent(string(buff[0:n]))
+		ch, st, _ := zlog.NewSTBEvent(string(buff[0:n]))
 
-		if ch != nil {
-			if ztore != nil {
+		if ztore != nil {
+			if ch != nil {
 				ztore.Add(*ch)
 				if durtore != nil {
 					durtore.Add(*ch)
 				}
-			} else {
-				chans <- ch
 			}
-
+		} else {
+			if ch != nil {
+				events <- ch.String()
+			} else if st != nil {
+				events <- st.String()
+			}
 		}
 
 	}
