@@ -48,6 +48,9 @@ func (zs *ConcurrentLog) Add(z ChZap) {
 	if okFrom == true {
 		zs.chansViewers[z.FromChan].mutex.Lock()
 		zs.chansViewers[z.FromChan].chanViewers.Viewers--
+		if zs.chansViewers[z.FromChan].chanViewers.Viewers <= 0 {
+			zs.chansViewers[z.FromChan].chanViewers.Viewers = 0
+		}
 		zs.chansViewers[z.FromChan].mutex.Unlock()
 	}
 }

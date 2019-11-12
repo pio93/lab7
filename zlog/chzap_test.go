@@ -79,7 +79,7 @@ var statuschangetests = []struct {
 	{"2013/07/20, 21:57:42, 203.124.29.72, Mute_Status: 0", "Mute_Status: 0"},
 }
 
-func DISABELEDTestSTBStatusChange(t *testing.T) {
+func TestSTBStatusChange(t *testing.T) {
 	for _, tt := range statuschangetests {
 		zap, schng, err := NewSTBEvent(tt.in)
 		if zap != nil || schng == nil || err != nil {
@@ -87,9 +87,9 @@ func DISABELEDTestSTBStatusChange(t *testing.T) {
 				tt.in, zap, schng, err, tt.out)
 		}
 		//TODO activate code later
-		// if schng.Status != tt.out {
-		// 	t.Errorf("NewSTBEvent(%q) => (nil, %q, nil), want (nil, %q, nil)",
-		// 		tt.in, schng.Status, tt.out)
-		// }
+		if schng.Status != tt.out {
+			t.Errorf("NewSTBEvent(%q) => (nil, %q, nil), want (nil, %q, nil)",
+				tt.in, schng.Status, tt.out)
+		}
 	}
 }
