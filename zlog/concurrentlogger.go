@@ -10,7 +10,6 @@ import (
 type ConcurrentLog struct {
 	//TODO(student) finish struct
 	chansViewers map[string]*channelLock
-	Durations    []time.Duration
 }
 
 // NewConcurrentZapLogger returns a concurrent logger.
@@ -97,14 +96,4 @@ func (zs *ConcurrentLog) ChannelsViewers() []*ChannelViewers {
 	}
 
 	return result
-}
-func (zs *ConcurrentLog) AverageDuration() time.Duration {
-	var totDuration, n int
-	for _, dur := range (*zs).Durations {
-		totDuration += int(dur)
-	}
-	if n = (len((*zs).Durations)); n > 0 {
-		return time.Duration((totDuration / n))
-	}
-	return 0
 }

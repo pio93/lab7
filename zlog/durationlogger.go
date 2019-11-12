@@ -10,6 +10,7 @@ import (
 type DurationLog struct {
 	chansDurations map[string]*ChannelDurations
 	Stats          []string
+	Durations      []time.Duration
 }
 
 //NewDurationLogger creates new DurationLog object
@@ -53,4 +54,14 @@ func (zs *DurationLog) Length() int {
 //ClearStats is clears the list of statistics
 func (zs *DurationLog) ClearStats() {
 	zs.Stats = nil
+}
+func (zs *DurationLog) AverageDuration() time.Duration {
+	var totDuration, n int
+	for _, dur := range (*zs).Durations {
+		totDuration += int(dur)
+	}
+	if n = (len((*zs).Durations)); n > 0 {
+		return time.Duration((totDuration / n))
+	}
+	return 0
 }

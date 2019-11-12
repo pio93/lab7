@@ -55,6 +55,7 @@ func runLab(labNum, mcastAdr string) {
 		//TODO write code for publishing events to a subscriber client
 		durtore = zlog.NewDurationLogger()
 		go startGRPC()
+		go AverageDuration(1000)
 	}
 }
 
