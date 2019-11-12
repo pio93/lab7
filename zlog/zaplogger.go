@@ -3,6 +3,7 @@ package zlog
 import (
 	"fmt"
 	"sync"
+	"time"
 )
 
 // ZapLogger is the interface that must be implemented for different zap loggers.
@@ -10,6 +11,7 @@ type ZapLogger interface {
 	Add(ChZap)
 	Entries() int
 	Viewers(channelName string) int
+	AverageDuration() time.Duration
 	Channels() []string
 	ChannelsViewers() []*ChannelViewers
 }

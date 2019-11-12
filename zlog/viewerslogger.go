@@ -9,6 +9,7 @@ import (
 type ViewersLog struct {
 	//TODO(student) finish struct
 	chansViewers map[string]*ChannelViewers
+	Durations    []time.Duration
 }
 
 // NewViewersZapLogger returns a viewers logger.
@@ -90,4 +91,16 @@ func (zs *ViewersLog) ChannelsViewers() []*ChannelViewers {
 	}
 
 	return result
+}
+
+// compute average duration between zaps
+func (zs *ViewersLog) AverageDuration() time.Duration {
+	var totDuration, n int
+	for _, dur := range (*zs).Durations {
+		totDuration += int(dur)
+	}
+	if n = (len((*zs).Durations)); n > 0 {
+		return time.Duration((totDuration / n))
+	}
+	return 0
 }

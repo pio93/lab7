@@ -89,3 +89,6 @@ func (zs *Zaps) ChannelsViewers() []*ChannelViewers {
 
 	return result
 }
+func (zs *Zaps) AverageDuration() time.Duration { // not implemented on this structure
+	return 0
+}

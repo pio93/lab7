@@ -54,7 +54,7 @@ func runLab(labNum, mcastAdr string) {
 	case "2.x":
 		//TODO write code for publishing events to a subscriber client
 		durtore = zlog.NewDurationLogger()
-		startGRPC()
+		go startGRPC()
 	}
 }
 
@@ -160,5 +160,11 @@ func topTen() {
 		runtime.ReadMemStats(&m)
 
 		fmt.Printf("Allocated memory: %v bytes\tTotal allocated memory: %v bytes\tObtained from OS: %v bytes\n", m.Alloc, m.TotalAlloc, m.HeapSys)
+	}
+}
+func AverageDuration(n int) {
+	for _ = range time.Tick((time.Duration(n)) * time.Millisecond) { //delay for readability
+		dur := ztore.AverageDuration()
+		fmt.Printf("Average duration: %0.2fs\n", dur.Seconds())
 	}
 }
