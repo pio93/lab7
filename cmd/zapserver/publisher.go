@@ -60,14 +60,17 @@ func (srv Server) Subscribe(subReq *proto.SubscribeRequest, stream proto.Subscri
 				log.Printf("Waits for %d seconds\n", subReq.RefreshRate)
 				time.Sleep(seconds)
 
-				stats := durtore.GetStats()
-				result := make([]string, len(stats))
+				avg := durtore.AverageDuration()
+				max := durtore.Max()
+				min := durtore.Min()
 
-				copy(result, stats)
+				durtore.ClearDurations()
 
-				durtore.ClearStats()
-
-				notification := proto.Notification{Duration: result}
+				notification := proto.Notification{
+					Average: int64(avg),
+					Max:     int64(max),
+					Min:     int64(min),
+				}
 				err := stream.Send(&notification)
 
 				if err != nil {
@@ -82,8 +85,8 @@ func (srv Server) Subscribe(subReq *proto.SubscribeRequest, stream proto.Subscri
 }
 
 func startGRPC() {
-	listener, err := net.Listen("tcp", ":4052")
-	log.Println("Listeing to clients on port 4052")
+	listener, err := net.Listen("tcp", ":4054")
+	log.Println("Listeing to clients on port 4054")
 	if err != nil {
 		log.Fatalf("Failed to listen: %v\n", err)
 	}

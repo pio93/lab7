@@ -47,7 +47,7 @@ func NewSTBEvent(event string) (*ChZap, *StatusChange, error) {
 
 	vals := strings.Split(event, ",")
 
-	time, err := time.Parse(timeFormat, fmt.Sprintf("%s, %s", strings.TrimSpace(vals[0]), strings.TrimSpace(vals[1])))
+	time, err := time.Parse(timeFormat, event[0:timeLen])
 
 	if err != nil {
 		err := errors.New("NewSTBEvent: failed to parse timestamp")

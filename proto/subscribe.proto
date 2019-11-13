@@ -17,5 +17,7 @@ message Notification {
 	// TODO: Add the variable(s) in the notification message
 	repeated string Channel = 1;
 	repeated int64 Viewers = 2;
-	repeated string Duration = 3;
+	int64 Average = 3;
+	int64 Max = 4; 
+	int64 Min = 5;
 }

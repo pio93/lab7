@@ -18,7 +18,7 @@ func main() {
 	)
 
 	flag.Parse()
-	conn, err := grpc.Dial("127.0.0.1:4052", grpc.WithInsecure())
+	conn, err := grpc.Dial("127.0.0.1:4054", grpc.WithInsecure())
 	log.Println("Dialing...")
 
 	if err != nil {
@@ -57,18 +57,27 @@ func main() {
 				break
 			}
 
-			fmt.Println("\nDurations")
-
-			if len(notification.Duration) == 0 {
-				fmt.Println("No changes yet.")
-			} else {
-				for _, v := range notification.Duration {
-					fmt.Println(v)
-				}
-			}
+			fmt.Println("\nDuration statistics:")
+			h, m, s := FormatTime(notification.Average)
+			fmt.Printf("Average duration: %dh : %dm : %ds\n", h, m, s)
+			h, m, s = FormatTime(notification.Max)
+			fmt.Printf("Longest duration: %dh : %dm : %ds\n", h, m, s)
+			h, m, s = FormatTime(notification.Min)
+			fmt.Printf("Shortest duration: %dh : %dm : %ds\n", h, m, s)
 		}
 	} else {
 		fmt.Println("This service does not exist")
 	}
 
+}
+
+//FormatTime is...
+func FormatTime(dur int64) (int, int, int) {
+	secs := int(dur)
+
+	seconds := secs % 60
+	mins := secs / 60
+	hours := mins / 60
+
+	return hours, mins, seconds
 }

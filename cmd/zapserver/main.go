@@ -29,7 +29,12 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
-		pprof.WriteHeapProfile(f)
+		err = pprof.WriteHeapProfile(f)
+
+		if err != nil {
+			log.Fatal(err)
+		}
+
 		f.Close()
 		fmt.Println("Saved memory profile")
 		fmt.Println("Analyze with: go tool pprof zapserver", *memprofile)

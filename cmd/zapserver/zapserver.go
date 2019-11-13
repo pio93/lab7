@@ -32,7 +32,7 @@ func runLab(labNum, mcastAdr string) {
 	case "1.6", "2.x":
 		ztore = zlog.NewViewersZapLogger()
 	case "1.7":
-		ztore = zlog.NewConcurrentZapLogger()
+		ztore = zlog.NewOldConcurrentZapLogger()
 	}
 	switch labNum {
 	case "1.1":
@@ -55,7 +55,6 @@ func runLab(labNum, mcastAdr string) {
 		//TODO write code for publishing events to a subscriber client
 		durtore = zlog.NewDurationLogger()
 		go startGRPC()
-		go AverageDuration(1000)
 	}
 }
 
@@ -164,11 +163,5 @@ func topTen() {
 		runtime.ReadMemStats(&m)
 
 		fmt.Printf("Allocated memory: %v bytes\tTotal allocated memory: %v bytes\tObtained from OS: %v bytes\n", m.Alloc, m.TotalAlloc, m.HeapSys)
-	}
-}
-func AverageDuration(n int) {
-	for _ = range time.Tick((time.Duration(n)) * time.Millisecond) { //delay for readability
-		dur := ztore.AverageDuration()
-		fmt.Printf("Average duration: %0.2fs\n", dur.Seconds())
 	}
 }
