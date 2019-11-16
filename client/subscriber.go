@@ -18,7 +18,7 @@ func main() {
 	)
 
 	flag.Parse()
-	conn, err := grpc.Dial("127.0.0.1:4054", grpc.WithInsecure())
+	conn, err := grpc.Dial("127.0.0.1:4057", grpc.WithInsecure())
 	log.Println("Dialing...")
 
 	if err != nil {

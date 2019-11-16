@@ -32,7 +32,7 @@ func runLab(labNum, mcastAdr string) {
 	case "1.6", "2.x":
 		ztore = zlog.NewViewersZapLogger()
 	case "1.7":
-		ztore = zlog.NewOldConcurrentZapLogger()
+		ztore = zlog.NewConcurrentZapLogger()
 	}
 	switch labNum {
 	case "1.1":

@@ -11,13 +11,25 @@ import (
 type DurationLog struct {
 	chansDurations map[string]*ChZap
 	Durations      []time.Duration
+	MaxValue       time.Duration
+	MinValue       time.Duration
+	AllDurations   time.Duration
+	Entries        int
 }
 
 //NewDurationLogger creates new DurationLog object
 func NewDurationLogger() *DurationLog {
 	chDur := make(map[string]*ChZap)
 	durations := make([]time.Duration, 0)
-	return &DurationLog{chansDurations: chDur, Durations: durations}
+	t, _ := time.ParseDuration("24h")
+	return &DurationLog{
+		chansDurations: chDur,
+		Durations:      durations,
+		MaxValue:       0,
+		MinValue:       t,
+		AllDurations:   0,
+		Entries:        0,
+	}
 }
 
 //Add adds new channelDuration if it is not found in map. If zap's ip is already a key in the map, add function puts current zap as
@@ -51,42 +63,50 @@ func (zs *DurationLog) Length() int {
 
 //AverageDuration is..
 func (zs *DurationLog) AverageDuration() time.Duration {
-	var totDuration int64
-	n := len(zs.Durations)
+	fmt.Printf("Entires before: %d\n", zs.Entries)
+	zs.Entries += len(zs.Durations)
+	fmt.Printf("Entires after: %d\n", zs.Entries)
+	fmt.Printf("Durations before: %d\n", zs.AllDurations)
 	for _, dur := range zs.Durations {
-		totDuration += int64(dur)
+		zs.AllDurations += dur
 	}
-	if n > 0 {
-		return time.Duration((totDuration / int64(n))) / 1000000000
+	fmt.Printf("Durations after: %d\n", zs.AllDurations)
+	if zs.Entries > 0 {
+		return time.Duration((int64(zs.AllDurations) / int64(zs.Entries))) / 1000000000
 	}
 	return 0
 }
 
 //Max is...
 func (zs *DurationLog) Max() time.Duration {
-	sort.SliceStable(zs.Durations, func(i, j int) bool {
+	sort.Slice(zs.Durations, func(i, j int) bool {
 		return zs.Durations[i] > zs.Durations[j]
 	})
 
 	if len(zs.Durations) > 0 {
-		return zs.Durations[0] / 1000000000
+		if zs.MaxValue < zs.Durations[0]/1000000000 {
+			zs.MaxValue = zs.Durations[0] / 1000000000
+		}
 	}
 
-	return 0
+	return zs.MaxValue
 }
 
 //Min is...
 func (zs *DurationLog) Min() time.Duration {
-	sort.SliceStable(zs.Durations, func(i, j int) bool {
+	sort.Slice(zs.Durations, func(i, j int) bool {
 		return zs.Durations[i] < zs.Durations[j]
 	})
 
 	if len(zs.Durations) > 0 {
-		return zs.Durations[0] / 1000000000
+		if zs.MinValue > zs.Durations[0]/1000000000 {
+			zs.MinValue = zs.Durations[0] / 1000000000
+		}
 	}
-
-	return 0
-
+	if len(zs.Durations) <= 0 {
+		return 0
+	}
+	return zs.MinValue
 }
 
 //ClearDurations is...
